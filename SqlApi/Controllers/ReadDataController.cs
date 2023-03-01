@@ -1,20 +1,27 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Data.SqlClient;
-using System.Text;
+using System.Data;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
 namespace SqlApi.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class SqlController : ControllerBase
+    public class ReadDataController : ControllerBase
     {
-        [HttpPost]
-        [ActionName("readData")]
-        public string readData(string commands)
+        // GET: api/<ReadDataController>
+        [HttpGet]
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
+        }
+
+        // GET api/<ReadDataController>/5
+        [HttpGet("{strcommand}")]
+        public string Get(string strcommand)
         {
             string connectionString = "Server=localhost\\SQLEXPRESS;Database=demo;Trusted_Connection=True;";
 
@@ -22,7 +29,7 @@ namespace SqlApi.Controllers
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
                 {
-                    using (SqlCommand command = new SqlCommand(commands, conn))
+                    using (SqlCommand command = new SqlCommand(strcommand, conn))
                     {
                         if (command.Connection.State == ConnectionState.Closed)
                         {
@@ -64,37 +71,22 @@ namespace SqlApi.Controllers
             }
         }
 
+        // POST api/<ReadDataController>
         [HttpPost]
-        [ActionName("writeData")]
-        public string writeData(string commands)
+        public void Post([FromBody] string value)
         {
-            string connectionString = "Server=localhost\\SQLEXPRESS;Database=demo;Trusted_Connection=True;";
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
-                conn.Open();
-                using (SqlTransaction transaction = conn.BeginTransaction())
-                {
-                    using (SqlCommand command = conn.CreateCommand())
-                    {
-                        command.Transaction = transaction;
+        }
 
-                        try
-                        {
-                            command.CommandText = commands;
-                            int rowsAffected = command.ExecuteNonQuery();//影響筆數
-                            transaction.Commit();
-                            return rowsAffected.ToString();
-                        }
-                        catch (Exception ex)
-                        {
-                            transaction.Rollback();
-                            return ex.Message;
-                        }
-                    }
-                }
-                
-            }
-            
+        // PUT api/<ReadDataController>/5
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody] string value)
+        {
+        }
+
+        // DELETE api/<ReadDataController>/5
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
         }
     }
 }
